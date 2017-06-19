@@ -6,6 +6,7 @@ using UnitTests.EF6.Database;
 using UnitTests.EF6.Helpers;
 using UnitTests.EF6.Model;
 using Xunit;
+using System.Data.Entity.Spatial;
 
 namespace UnitTests.EF6.BulkInsertTests
 {
@@ -16,6 +17,8 @@ namespace UnitTests.EF6.BulkInsertTests
 
         public EF6_SimpleEntityBulkInsert()
         {
+            SqlServerTypes.Utilities.LoadNativeAssemblies(AppDomain.CurrentDomain.BaseDirectory);
+
             _context = new TestDatabase();
             ClearTable();
             _collection = new List<SimpleModel>();
@@ -27,7 +30,8 @@ namespace UnitTests.EF6.BulkInsertTests
                     IntValue = Helper.RandomInt(),
                     DateTime = DateTime.Today,
                     Type = Helper.RandomEnum(),
-                    DoubleValue = Helper.RandomDouble(1, 10)
+                    DoubleValue = Helper.RandomDouble(1, 10),
+                    LatitudeLongitude = DbGeography.PointFromText(string.Format("POINT({0} {1})", 23, 16), 4326)
                 });
             }
         }
@@ -69,6 +73,7 @@ namespace UnitTests.EF6.BulkInsertTests
                 Assert.Equal(entity.IntValue, saved.IntValue);
                 Assert.Equal(entity.Type, saved.Type);
                 Assert.Equal(entity.StringProperty, saved.StringProperty);
+                Assert.Equal(entity.LatitudeLongitude.SpatialEquals(saved.LatitudeLongitude), true);
             }
         }
 
@@ -110,6 +115,7 @@ namespace UnitTests.EF6.BulkInsertTests
                 Assert.Equal(entity.IntValue, saved.IntValue);
                 Assert.Equal(entity.Type, saved.Type);
                 Assert.Equal(entity.StringProperty, saved.StringProperty);
+                Assert.Equal(entity.LatitudeLongitude.SpatialEquals(saved.LatitudeLongitude), true);
             }
         }
 
@@ -151,6 +157,7 @@ namespace UnitTests.EF6.BulkInsertTests
                 Assert.Equal(entity.IntValue, saved.IntValue);
                 Assert.Equal(entity.Type, saved.Type);
                 Assert.Equal(entity.StringProperty, saved.StringProperty);
+                Assert.Equal(entity.LatitudeLongitude.SpatialEquals(saved.LatitudeLongitude), true);
             }
         }
 
@@ -192,6 +199,7 @@ namespace UnitTests.EF6.BulkInsertTests
                 Assert.Equal(entity.IntValue, saved.IntValue);
                 Assert.Equal(entity.Type, saved.Type);
                 Assert.Equal(entity.StringProperty, saved.StringProperty);
+                Assert.Equal(entity.LatitudeLongitude.SpatialEquals(saved.LatitudeLongitude), true);
             }
         }
 

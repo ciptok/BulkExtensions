@@ -6,6 +6,11 @@ using System.Data;
 #endif
 using System.Data.Common;
 using System.Linq;
+#if EF6
+using System.Data.Entity.Spatial;
+using System.Data.SqlTypes;
+using Microsoft.SqlServer.Types;
+#endif
 
 namespace EntityFramework.BulkExtensions.Commons.Helpers
 {
@@ -180,7 +185,27 @@ namespace EntityFramework.BulkExtensions.Commons.Helpers
 
         public override object GetValue(int ordinal)
         {
+#if EF6
+            object value = _currentElement[ordinal];
+
+            var dbgeo = value as DbGeography;
+            if (dbgeo != null)
+            {
+                return SqlGeography.STGeomFromText(new SqlChars(dbgeo.WellKnownValue.WellKnownText),
+                                                   dbgeo.CoordinateSystemId);
+            }
+
+            var dbgeom = value as DbGeometry;
+            if (dbgeom != null)
+            {
+                return SqlGeometry.STGeomFromText(new SqlChars(dbgeom.WellKnownValue.WellKnownText), 
+                                                  dbgeom.CoordinateSystemId);
+            }
+
+            return value;
+#else
             return _currentElement[ordinal];
+#endif
         }
 
         public override IEnumerator GetEnumerator()

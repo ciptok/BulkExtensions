@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Entity.Spatial;
 
 namespace UnitTests.EF6.Model
 {
@@ -13,6 +14,7 @@ namespace UnitTests.EF6.Model
         public int IntValue { get; set; }
         public double DoubleValue { get; set; }
         public SimpleEnum Type { get; set; }
+        public DbGeography LatitudeLongitude { get; set; }
     }
 
     public enum SimpleEnum
