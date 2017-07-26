@@ -37,7 +37,11 @@ namespace EntityFramework.BulkExtensions.Mapping
                     .ToList();
 
                 entityMapping.HierarchyMapping = GetHierarchyMappings(typeMappings);
-                properties.Add(GetDiscriminatorProperty(typeMappings));
+                var discriminator = GetDiscriminatorProperty(typeMappings);
+                if (!properties.Any(mapping => mapping.ColumnName.Equals(discriminator.ColumnName)))
+                {
+                    properties.Add(discriminator);
+                }
             }
 
             entityMapping.Properties = properties;
@@ -107,7 +111,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 {
                     ColumnName = propertyMapping.Column.Name,
                     PropertyName = propertyMapping.Property.Name,
-                    IsPk = ((EntityType) propertyMapping.Column.DeclaringType).KeyProperties
+                    IsPk = ((EntityType)propertyMapping.Column.DeclaringType).KeyProperties
                         .Any(property => property.Name.Equals(propertyMapping.Column.Name)),
                     IsDbGenerated = propertyMapping.Column.IsStoreGeneratedIdentity
                     || propertyMapping.Column.IsStoreGeneratedComputed
@@ -160,7 +164,7 @@ namespace EntityFramework.BulkExtensions.Mapping
                 .GetItems<EntityContainer>(DataSpace.CSpace)
                 .Single()
                 .EntitySets
-                .Single(s => s.ElementType.Name == entityType.Name);
+                .Single(s => s.ElementType.Name == entityType.GetSetType().Name);
 
             var mapping = metadata.GetItems<EntityContainerMapping>(DataSpace.CSSpace)
                 .Single()
@@ -168,6 +172,11 @@ namespace EntityFramework.BulkExtensions.Mapping
                 .Single(s => s.EntitySet == entitySet);
 
             return mapping.EntityTypeMappings;
+        }
+
+        private static EdmType GetSetType(this EdmType entityType)
+        {
+            return entityType.BaseType == null ? entityType : entityType.BaseType.GetSetType();
         }
     }
 }
